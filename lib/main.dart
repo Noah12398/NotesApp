@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:notes/Controller.dart';
+import 'package:notes/Note_model.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  Hive.registerAdapter(NoteAdapter());
   await Hive.openBox('notesBox');
   runApp(const MyApp());
 }
@@ -73,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     elevation: 3,
                     shadowColor: Colors.black,
                     child: ListTile(
-                      title: Text(controller.notes[index]),
+                      title: Text(controller.notes[index].text),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -82,15 +85,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             onPressed: () => controller.deleteNoteAt(index),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.favorite, color: Colors.red),
+                            icon:  Icon(Icons.favorite, color:controller.isfavourite(index)?Colors.red:Colors.black),
                             onPressed: () {
-                              // Optional: Handle favorite action
+                              controller.togglefavourite(index);
                             },
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit, color: Color.fromARGB(255, 7, 7, 7)),
                             onPressed: () {
-                              TextEditingController editController = TextEditingController(text: controller.notes[index]);
+                              TextEditingController editController = TextEditingController(text: controller.notes[index].text);
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -134,9 +137,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
-  }
-
-  hi() {
-    print("sss");
   }
 }
