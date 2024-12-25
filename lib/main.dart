@@ -28,72 +28,91 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Controller controller = Get.put(Controller());
     final TextEditingController controller2 = TextEditingController();
+    final TextEditingController controller3 = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: controller2,
-              decoration: const InputDecoration(
-                labelText: 'Enter your note',
-                border: OutlineInputBorder(),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: controller2,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter your note',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller2.text.isNotEmpty) {
-                controller.addNote(controller2.text);
-                controller2.clear();
-              }
-            },
-            child: const Text('Add Note'),
+              ElevatedButton(
+                onPressed: () {
+                  if (controller2.text.isNotEmpty) {
+                    controller.addNote(controller2.text);
+                    controller2.clear();
+                  }
+                },
+                child: const Text('Add Note'),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: controller3,
+                  decoration: const InputDecoration(
+                    labelText: 'Search notes',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (query) {
+                    controller.filterNotes(controller3.text); 
+                  },
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: GetBuilder<Controller>(
               builder: (_) => ListView.builder(
-                itemCount: controller.notes.length,
+                itemCount: controller.filteredNotes.length,
                 itemBuilder: (context, index) {
                   return Card(
                     elevation: 3,
                     shadowColor: Colors.black,
                     child: ListTile(
-                      title: Text(controller.notes[index].text),
+                      title: Text(controller.filteredNotes[index].text),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.delete),
-                            onPressed: () => controller.deleteNoteAt(index),
+                            onPressed: () => controller.deleteNoteAt(controller.filteredNotes[index].text,index),
                           ),
                           IconButton(
-                            icon:  Icon(Icons.favorite, color:controller.isfavourite(index)?Colors.red:Colors.black),
+                            icon: Icon(Icons.favorite,
+                                color: controller.isfavourite(index)
+                                    ? Colors.red
+                                    : Colors.black),
                             onPressed: () {
                               controller.togglefavourite(index);
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.edit, color: Color.fromARGB(255, 7, 7, 7)),
+                            icon: const Icon(Icons.edit,
+                                color: Color.fromARGB(255, 7, 7, 7)),
                             onPressed: () {
-                              TextEditingController editController = TextEditingController(text: controller.notes[index].text);
+                              TextEditingController editController =
+                                  TextEditingController(
+                                      text: controller.filteredNotes[index].text);
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -101,20 +120,23 @@ class _MyHomePageState extends State<MyHomePage> {
                                     title: const Text("Edit Note"),
                                     content: TextField(
                                       controller: editController,
-                                      decoration: const InputDecoration(hintText: "Enter new note"),
+                                      decoration: const InputDecoration(
+                                          hintText: "Enter new note"),
                                     ),
                                     actions: <Widget>[
                                       TextButton(
                                         child: const Text("Cancel"),
                                         onPressed: () {
-                                          Navigator.of(context).pop();  // Close the dialog
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
                                         },
                                       ),
                                       TextButton(
                                         child: const Text("Save"),
                                         onPressed: () {
                                           if (editController.text.isNotEmpty) {
-                                            controller.editNoteAt(index, editController.text);
+                                            controller.editNoteAt(
+                                                index, editController.text);
                                           }
                                           Navigator.of(context).pop();
                                         },
@@ -125,7 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               );
                             },
                           ),
-                        
                         ],
                       ),
                     ),
