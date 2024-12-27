@@ -7,6 +7,8 @@ class Controller extends GetxController {
   final notesBox = Hive.box('notesBox');
   var filteredNotes = <Note>[];
   String query2 = '';
+  String query3 = 'All';
+
   @override
   void onInit() {
     super.onInit();
@@ -15,11 +17,11 @@ class Controller extends GetxController {
     update();
   }
 
-  void addNote(String text,String selectedValue) {
+  void addNote(String text, String selectedValue) {
     final newNote = Note(
       text: text,
       isFavorite: false,
-      category:selectedValue,
+      category: selectedValue,
     );
     notesBox.put(newNote.text, newNote);
     notes.add(newNote);
@@ -28,14 +30,19 @@ class Controller extends GetxController {
   }
 
   void updateFilteredNotes() {
-    filteredNotes = query2.isEmpty
-        ? notes.toList()
-        : notes.where((note) => note.text.contains(query2)).toList();
+    if (query2.isNotEmpty) {
+      filteredNotes = notes.where((note) => note.text.contains(query2)).toList();
+    } else if (query3 != 'All') {
+      filteredNotes = notes.where((note) => note.category.toLowerCase().contains(query3.toLowerCase())).toList();
+    } else {
+      filteredNotes = List.from(notes);
+    }
+    update();
   }
 
-  deleteNoteAt(String text, int index) {
+  void deleteNoteAt(String text, int index) {
     notesBox.delete(text);
-    notes = notesBox.values.toList().cast<Note>();
+    notes.removeAt(index);
     updateFilteredNotes();
     update();
   }
@@ -53,6 +60,7 @@ class Controller extends GetxController {
     updateFilteredNotes();
     update();
   }
+
   void togglefavourite(int index) {
     final note = notes[index];
     note.isFavorite = !note.isFavorite;
@@ -68,29 +76,26 @@ class Controller extends GetxController {
   void filterNotes(String query) {
     query2 = query;
     if (query.isEmpty) {
-      filteredNotes = List.from(notes);
+      updateFilteredNotes();
     } else {
-      // Filter notes that contain the query (case-insensitive)
       filteredNotes = notes.where((note) {
         return note.text.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
-    update(); // Notify listeners to update the UI
+    update();
   }
 
-void filterCategories(String query) {
-    query2 = query;
-    if(query2=='All'){
-            filteredNotes = List.from(notes);
-    }else if (query.isEmpty) {
+  void filterCategories(String query) {
+    query3 = query;
+    if (query == 'All') {
+      filteredNotes = List.from(notes);
+    } else if (query.isEmpty) {
       filteredNotes = List.from(notes);
     } else {
       filteredNotes = notes.where((note) {
         return note.category.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
-    
-    update(); // Notify listeners to update the UI
+    update();
   }
-
 }

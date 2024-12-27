@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 158, 213, 48)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Notes App'),
@@ -49,7 +49,7 @@ class MyHomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: SizedBox(
-              width: 200, // Adjust the width as needed
+              width: 200,
               child: TextField(
                 controller: controller3,
                 decoration: const InputDecoration(
