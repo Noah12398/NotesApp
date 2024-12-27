@@ -36,16 +36,66 @@ class MyHomePage extends StatelessWidget {
     Controller controller = Get.put(Controller());
     final TextEditingController controller2 = TextEditingController();
     final TextEditingController controller3 = TextEditingController();
+    List<String> dropdownItems = ['All', 'Work', 'Personal', 'Ideas'];
+    String? selectedValue = dropdownItems.first;
+    String? selectedValue2 = dropdownItems.first;
+
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80.0,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SizedBox(
+              width: 200, // Adjust the width as needed
+              child: TextField(
+                controller: controller3,
+                decoration: const InputDecoration(
+                  labelText: 'Search notes',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (query) {
+                  controller.filterNotes(query);
+                },
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 250,
+            child: Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButtonFormField<String>(
+                  value: selectedValue2,
+                  onChanged: (newValue) {
+                    controller.filterCategories(newValue!);
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Options',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: dropdownItems
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
           Row(
             children: [
               Expanded(
+                flex: 3,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
@@ -57,25 +107,41 @@ class MyHomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (controller2.text.isNotEmpty) {
-                    controller.addNote(controller2.text);
-                    controller2.clear();
-                  }
-                },
-                child: const Text('Add Note'),
-              ),
               Expanded(
-                child: TextField(
-                  controller: controller3,
-                  decoration: const InputDecoration(
-                    labelText: 'Search notes',
-                    border: OutlineInputBorder(),
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedValue,
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        selectedValue = newValue;
+                      }
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Options',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: dropdownItems
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
-                  onChanged: (query) {
-                    controller.filterNotes(controller3.text); 
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (controller2.text.isNotEmpty) {
+                      controller.addNote(controller2.text, selectedValue!);
+                      controller2.clear();
+                    }
                   },
+                  child: const Text('Add Note'),
                 ),
               ),
             ],
@@ -93,9 +159,18 @@ class MyHomePage extends StatelessWidget {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          Chip(
+                            label: Text(
+                              controller.notes[index].category, // Display the category
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor:
+                                Colors.deepPurple, // Customizable color
+                          ),
                           IconButton(
                             icon: const Icon(Icons.delete),
-                            onPressed: () => controller.deleteNoteAt(controller.filteredNotes[index].text,index),
+                            onPressed: () => controller.deleteNoteAt(
+                                controller.filteredNotes[index].text, index),
                           ),
                           IconButton(
                             icon: Icon(Icons.favorite,
@@ -112,7 +187,8 @@ class MyHomePage extends StatelessWidget {
                             onPressed: () {
                               TextEditingController editController =
                                   TextEditingController(
-                                      text: controller.filteredNotes[index].text);
+                                      text:
+                                          controller.filteredNotes[index].text);
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {

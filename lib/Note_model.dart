@@ -10,8 +10,12 @@ class Note {
   @HiveField(1)
    bool isFavorite;
 
+  @HiveField(2)
+   String category;
+
   Note({
     required this.text,
-    required this.isFavorite,
+    required this.isFavorite, 
+    required this.category,
   });
 }

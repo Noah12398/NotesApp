@@ -15,10 +15,11 @@ class Controller extends GetxController {
     update();
   }
 
-  void addNote(String text) {
+  void addNote(String text,String selectedValue) {
     final newNote = Note(
       text: text,
       isFavorite: false,
+      category:selectedValue,
     );
     notesBox.put(newNote.text, newNote);
     notes.add(newNote);
@@ -52,7 +53,6 @@ class Controller extends GetxController {
     updateFilteredNotes();
     update();
   }
-
   void togglefavourite(int index) {
     final note = notes[index];
     note.isFavorite = !note.isFavorite;
@@ -77,4 +77,20 @@ class Controller extends GetxController {
     }
     update(); // Notify listeners to update the UI
   }
+
+void filterCategories(String query) {
+    query2 = query;
+    if(query2=='All'){
+            filteredNotes = List.from(notes);
+    }else if (query.isEmpty) {
+      filteredNotes = List.from(notes);
+    } else {
+      filteredNotes = notes.where((note) {
+        return note.category.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    }
+    
+    update(); // Notify listeners to update the UI
+  }
+
 }
